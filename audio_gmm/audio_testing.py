@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
         result = 1 if score > threshold else 0
 
-        with open("results.txt", "a") as f:
+        with open("audio_results.txt", "a") as f:
             f.write(f'{seg} {score} {result}\n')
 
 

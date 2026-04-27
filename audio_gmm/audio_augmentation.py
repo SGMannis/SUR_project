@@ -116,7 +116,7 @@ if __name__ == "__main__":
             filepath = os.path.join("non_target_new", filename)
             rate, data = wavfile.read(filepath) # read as int16
             assert(rate == SR)
-            data = data / 32767 # normalize
+            data = data / UNIT16MAX # normalize
 
             clean_data = nr.reduce_noise(y=data, sr=SR)
 
