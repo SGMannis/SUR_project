@@ -54,29 +54,27 @@ if __name__ == "__main__":
         MAX_SCORE = np.float64(line[2])
 
 
-    for filename in sorted(os.listdir(dir)):
-        if not filename.endswith(".wav"):
-            continue
+    with open("audio_gmm_results.txt", "w") as f:
+        for filename in sorted(os.listdir(dir)):
+            if not filename.endswith(".wav"):
+                continue
 
-        seg = filename.split(".")[0]
-        filepath = os.path.join(dir, filename)
-        data = load_and_cut(filepath)
+            seg = filename.split(".")[0]
+            filepath = os.path.join(dir, filename)
+            data = load_and_cut(filepath)
 
-        # should never happen but if it does, this prevents it from crash
-        if data.shape[0] == 0:
-            continue
+            # should never happen but if it does, this prevents it from crash
+            if data.shape[0] == 0:
+                continue
 
-        data_features = mfcc(data, 400, 240, 512, SR, 23, 13)
+            data_features = mfcc(data, 400, 240, 512, SR, 23, 13)
 
-        ll_t = logpdf_gmm(data_features, Ws_t, MUs_t, COVs_t)
-        ll_n = logpdf_gmm(data_features, Ws_nt, MUs_nt, COVs_nt)
-        score = np.mean(ll_t) - np.mean(ll_n)
+            ll_t = logpdf_gmm(data_features, Ws_t, MUs_t, COVs_t)
+            ll_n = logpdf_gmm(data_features, Ws_nt, MUs_nt, COVs_nt)
+            score = np.mean(ll_t) - np.mean(ll_n)
 
-        score = norm_score(score, MIN_SCORE, MAX_SCORE)
+            score = norm_score(score, MIN_SCORE, MAX_SCORE)
 
-        result = 1 if score > threshold else 0
+            result = 1 if score > threshold else 0
 
-        with open("audio_gmm_results.txt", "a") as f:
             f.write(f'{seg} {score} {result}\n')
-
-
