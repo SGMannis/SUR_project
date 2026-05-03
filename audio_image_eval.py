@@ -8,8 +8,8 @@ def parse_arguments():
     parser.add_argument(
         "--audio_result", 
         type=str, 
-        default="audio_gmm/audio_gmm_results.txt",
-        help="Path to .txt file with audio model results (default: audio_gmm/audio_gmm_results.txt)"
+        default="audio_gmm/audio_gmm_result.txt",
+        help="Path to .txt file with audio model results (default: audio_gmm/audio_gmm_result.txt)"
     )
     
     parser.add_argument(
