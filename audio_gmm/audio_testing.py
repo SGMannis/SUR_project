@@ -54,7 +54,7 @@ if __name__ == "__main__":
         MAX_SCORE = np.float64(line[2])
 
 
-    with open("audio_gmm_results.txt", "w") as f:
+    with open("audio_gmm_result.txt", "w") as f:
         for filename in sorted(os.listdir(dir)):
             if not filename.endswith(".wav"):
                 continue
