@@ -21,6 +21,13 @@ def parse_arguments():
     return parser.parse_args()
 
 
+def norm_score(score, min_val, max_val):
+
+    score_clipped = np.clip(score, min_val, max_val)    
+    # min max scaler
+    return (score_clipped - min_val) / (max_val - min_val)
+
+
 if __name__ == "__main__":
 
     args = parse_arguments()
@@ -41,10 +48,13 @@ if __name__ == "__main__":
 
     # model threshold
     with open('audio_gmm_model/threshold.txt', 'r') as f:
-        threshold = np.float64(f.read())
+        line = f.readline().split()
+        threshold = np.float64(line[0])
+        MIN_SCORE = np.float64(line[1])
+        MAX_SCORE = np.float64(line[2])
 
 
-    for filename in os.listdir(dir):
+    for filename in sorted(os.listdir(dir)):
         if not filename.endswith(".wav"):
             continue
 
@@ -60,11 +70,13 @@ if __name__ == "__main__":
 
         ll_t = logpdf_gmm(data_features, Ws_t, MUs_t, COVs_t)
         ll_n = logpdf_gmm(data_features, Ws_nt, MUs_nt, COVs_nt)
-        score = sum(ll_t) - sum(ll_n)
+        score = np.mean(ll_t) - np.mean(ll_n)
+
+        score = norm_score(score, MIN_SCORE, MAX_SCORE)
 
         result = 1 if score > threshold else 0
 
-        with open("audio_results.txt", "a") as f:
+        with open("audio_gmm_results.txt", "a") as f:
             f.write(f'{seg} {score} {result}\n')
 
 

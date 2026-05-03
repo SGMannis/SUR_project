@@ -138,24 +138,35 @@ if __name__ == "__main__":
         for tst in tar_val_set:
             ll_t = logpdf_gmm(tst, Ws_t, MUs_t, COVs_t)
             ll_n = logpdf_gmm(tst, Ws_nt, MUs_nt, COVs_nt)
-            score = np.append(score, sum(ll_t) - sum(ll_n))
+            score = np.append(score, np.mean(ll_t) - np.mean(ll_n))
         scores_tar = np.append(scores_tar, score)
 
         score = np.array([])
         for tst in nontar_val_set:
             ll_t = logpdf_gmm(tst, Ws_t, MUs_t, COVs_t)
             ll_n = logpdf_gmm(tst, Ws_nt, MUs_nt, COVs_nt)
-            score = np.append(score, sum(ll_t) - sum(ll_n))
+            score = np.append(score, np.mean(ll_t) - np.mean(ll_n))
         scores_nontar = np.append(scores_nontar, score)
 
 
-    threshold, _ = find_eer_threshold(scores_tar, scores_nontar)
-    print(f'EER Threshold: {threshold}')
-    print(f"Fraction of correctly recognized targets: {np.mean(scores_tar > threshold)}")
-    print(f"Fraction of correctly recognized non-targets: {np.mean(scores_nontar < threshold)}")
+    MIN_SCORE = min(np.min(scores_tar), np.min(scores_nontar))
+    MAX_SCORE = max(np.max(scores_tar), np.max(scores_nontar))
 
+    scores_tar_norm = (scores_tar - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)
+    scores_nontar_norm = (scores_nontar - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)
+
+    threshold_norm, _ = find_eer_threshold(scores_tar_norm, scores_nontar_norm)
+    
+    print(f'Normalizovaný EER Threshold (0-1): {threshold_norm}')
+    print(f"Fraction of correctly recognized targets: {np.mean(scores_tar_norm > threshold_norm)}")
+    print(f"Fraction of correctly recognized non-targets: {np.mean(scores_nontar_norm < threshold_norm)}")
 
     if not os.path.exists("audio_gmm_model"):
         os.makedirs("audio_gmm_model")
+        
+    # Uložíme si nejen threshold, ale i MIN a MAX, protože je budeme nutně potřebovat pro testovací data!
     with open('audio_gmm_model/threshold.txt', 'w') as f:
-        f.write(str(threshold))
+        f.write(f"{threshold_norm} ")
+        f.write(f"{MIN_SCORE} ")
+        f.write(f"{MAX_SCORE}")
+
