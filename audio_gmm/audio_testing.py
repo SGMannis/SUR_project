@@ -35,7 +35,8 @@ if __name__ == "__main__":
     if not os.path.isdir(dir):
         print(f"Dir '{dir}' not found")
         exit()
-
+    
+    # load
     # target model
     Ws_t = np.load("audio_gmm_model/Ws_t.npy")
     MUs_t = np.load("audio_gmm_model/MUs_t.npy")
@@ -46,7 +47,7 @@ if __name__ == "__main__":
     MUs_nt = np.load("audio_gmm_model/MUs_nt.npy")
     COVs_nt = np.load("audio_gmm_model/COVs_nt.npy")
 
-    # model threshold
+    # model threshold and norm consts
     with open('audio_gmm_model/threshold.txt', 'r') as f:
         line = f.readline().split()
         threshold = np.float64(line[0])
@@ -71,6 +72,7 @@ if __name__ == "__main__":
 
             ll_t = logpdf_gmm(data_features, Ws_t, MUs_t, COVs_t)
             ll_n = logpdf_gmm(data_features, Ws_nt, MUs_nt, COVs_nt)
+            # priors are 0.5, so it cancels out
             score = np.mean(ll_t) - np.mean(ll_n)
 
             score = norm_score(score, MIN_SCORE, MAX_SCORE)

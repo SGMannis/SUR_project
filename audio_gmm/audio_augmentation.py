@@ -51,6 +51,7 @@ def inverse(data):
 def augment_audio(data_original):
     changed = False
     data = data_original.copy()
+    # at least one augmentation is done
     while not changed:
         if random.random() < 0.3:
             data = echo(data)

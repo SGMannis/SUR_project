@@ -128,16 +128,15 @@ if __name__ == "__main__":
         nontar_train_set = compute_mfcc(nontar_train_set)
         nontar_val_set = compute_mfcc(nontar_val_set)
 
-        # print("target training")
         Ws_t, MUs_t, COVs_t = gmm_training(tar_train_set, 6, 15)
 
-        # print("non-target training")
         Ws_nt, MUs_nt, COVs_nt = gmm_training(nontar_train_set, 18, 25)
 
         score = np.array([])
         for tst in tar_val_set:
             ll_t = logpdf_gmm(tst, Ws_t, MUs_t, COVs_t)
             ll_n = logpdf_gmm(tst, Ws_nt, MUs_nt, COVs_nt)
+            # priors are 0.5, so it cancels out
             score = np.append(score, np.mean(ll_t) - np.mean(ll_n))
         scores_tar = np.append(scores_tar, score)
 
@@ -145,6 +144,7 @@ if __name__ == "__main__":
         for tst in nontar_val_set:
             ll_t = logpdf_gmm(tst, Ws_t, MUs_t, COVs_t)
             ll_n = logpdf_gmm(tst, Ws_nt, MUs_nt, COVs_nt)
+            # priors are 0.5, so it cancels out
             score = np.append(score, np.mean(ll_t) - np.mean(ll_n))
         scores_nontar = np.append(scores_nontar, score)
 
@@ -152,19 +152,20 @@ if __name__ == "__main__":
     MIN_SCORE = min(np.min(scores_tar), np.min(scores_nontar))
     MAX_SCORE = max(np.max(scores_tar), np.max(scores_nontar))
 
+    # Min-Max scaling
     scores_tar_norm = (scores_tar - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)
     scores_nontar_norm = (scores_nontar - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)
 
     threshold_norm, _ = find_eer_threshold(scores_tar_norm, scores_nontar_norm)
     
-    print(f'Normalizovaný EER Threshold (0-1): {threshold_norm}')
+    print(f'Norm EER Threshold (0-1): {threshold_norm}')
     print(f"Fraction of correctly recognized targets: {np.mean(scores_tar_norm > threshold_norm)}")
     print(f"Fraction of correctly recognized non-targets: {np.mean(scores_nontar_norm < threshold_norm)}")
 
     if not os.path.exists("audio_gmm_model"):
         os.makedirs("audio_gmm_model")
         
-    # Uložíme si nejen threshold, ale i MIN a MAX, protože je budeme nutně potřebovat pro testovací data!
+    # save threshold and min and max for normalization
     with open('audio_gmm_model/threshold.txt', 'w') as f:
         f.write(f"{threshold_norm} ")
         f.write(f"{MIN_SCORE} ")

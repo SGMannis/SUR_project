@@ -2,6 +2,7 @@ import os
 import numpy as np
 import argparse
 
+
 def parse_arguments():
     parser = argparse.ArgumentParser(description="Multimodal Score Fusion (Audio + Face)")
     
@@ -51,6 +52,7 @@ if __name__ == "__main__":
 
                         a_filename = a_line[0]
                         i_filename = i_line[0]
+                        # we are evaluating matching image and audio
                         assert(a_filename == i_filename)
                         
                         a_score = np.float64(a_line[1])
